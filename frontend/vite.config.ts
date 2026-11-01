@@ -1,0 +1,16 @@
+import react from "@vitejs/plugin-react";
+import { defineConfig } from "vite";
+
+// In dev, /api/* is proxied to the FastAPI server so the browser sees one origin.
+export default defineConfig({
+  plugins: [react()],
+  server: {
+    proxy: {
+      "/api": {
+        target: process.env.VITE_API_TARGET ?? "http://localhost:8000",
+        changeOrigin: true,
+        rewrite: (p) => p.replace(/^\/api/, ""),
+      },
+    },
+  },
+});
