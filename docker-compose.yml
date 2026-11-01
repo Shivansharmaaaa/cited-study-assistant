@@ -1,0 +1,34 @@
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: study
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}
+      POSTGRES_DB: study
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U study"]
+      interval: 5s
+      retries: 10
+
+  api:
+    build: ./backend
+    environment:
+      APP_ENV: production
+      SECRET_KEY: ${SECRET_KEY:?set SECRET_KEY (32+ chars) in .env}
+      DATABASE_URL: postgresql+psycopg://study:${POSTGRES_PASSWORD}@db:5432/study
+      CORS_ORIGINS: http://localhost:8080
+    depends_on:
+      db:
+        condition: service_healthy
+
+  web:
+    build: ./frontend
+    ports:
+      - "8080:80"
+    depends_on:
+      - api
+
+volumes:
+  pgdata:
