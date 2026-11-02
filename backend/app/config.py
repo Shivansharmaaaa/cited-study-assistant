@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 import os
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 
 @dataclass(frozen=True)
@@ -12,6 +12,10 @@ class Settings:
     token_ttl_minutes: int = 60
     env: str = "dev"
     cors_origins: tuple[str, ...] = ("http://localhost:5173",)
+    retrieval: str = "hybrid"  # "hybrid" or "bm25"
+    embedder: str = "hash"  # "hash" or "fastembed"
+    anthropic_api_key: str = field(default="", repr=False)  # empty means no LLM, deterministic paths only
+    anthropic_model: str = "claude-opus-5-5"
 
     @property
     def is_production(self) -> bool:
@@ -37,4 +41,8 @@ def load_settings() -> Settings:
         token_ttl_minutes=int(os.getenv("TOKEN_TTL_MINUTES", "60")),
         env=env,
         cors_origins=origins,
+        retrieval=os.getenv("RETRIEVAL", Settings.retrieval),
+        embedder=os.getenv("EMBEDDER", Settings.embedder),
+        anthropic_api_key=os.getenv("ANTHROPIC_API_KEY", ""),
+        anthropic_model=os.getenv("ANTHROPIC_MODEL", Settings.anthropic_model),
     )

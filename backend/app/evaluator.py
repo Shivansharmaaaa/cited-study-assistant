@@ -4,13 +4,13 @@ A rubric is a list of key points; each key point lists acceptable keyword
 variants. A key point counts as covered if any variant appears in the answer
 (after lowercasing). Score = covered / total. Feedback names what was missed.
 
-This is deliberately simple and transparent. It is not an LLM grader, and the
-README says so: the point is a reproducible baseline you can unit test.
+This is deliberately simple and transparent: a reproducible baseline you can unit
+test, and the fallback whenever the LLM grader (grader.py) is off or fails.
 """
 from __future__ import annotations
 
 import re
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 
 @dataclass
@@ -25,10 +25,17 @@ class Evaluation:
     covered: list[str]
     missed: list[str]
     feedback: str
+    grader: str = "keyword"  # "keyword" or "claude"
+    evidence: dict[str, str] = field(default_factory=dict)  # label -> verified quote
+    rejected: list[str] = field(default_factory=list)  # claimed covered, quote not found
 
 
 def _norm(text: str) -> str:
     return re.sub(r"\s+", " ", text.lower())
+
+
+def feedback_for(missed: list[str]) -> str:
+    return "Missing: " + "; ".join(missed) + "." if missed else "All key points covered."
 
 
 def evaluate(answer_text: str, rubric: list[KeyPoint]) -> Evaluation:
@@ -42,11 +49,7 @@ def evaluate(answer_text: str, rubric: list[KeyPoint]) -> Evaluation:
         else:
             missed.append(kp.label)
     score = round(len(covered) / len(rubric), 2)
-    if not missed:
-        feedback = "All key points covered."
-    else:
-        feedback = "Missing: " + "; ".join(missed) + "."
-    return Evaluation(score, covered, missed, feedback)
+    return Evaluation(score, covered, missed, feedback_for(missed))
 
 
 def rubric_from_dicts(items: list[dict]) -> list[KeyPoint]:

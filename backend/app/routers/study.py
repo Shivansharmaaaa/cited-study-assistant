@@ -9,7 +9,8 @@ from sqlalchemy.orm import Session
 
 from ..assistant import answer
 from ..deps import current_user, get_db
-from ..evaluator import evaluate, rubric_from_dicts
+from ..evaluator import rubric_from_dicts
+from ..grader import grade
 from ..models import Attempt, Question, ReviewState, User, utcnow
 from ..schemas import (AskIn, AttemptIn, AttemptOut, QuestionIn, QuestionOut, StatsOut, TopicStat)
 from ..srs import SrsState, next_state, quality_from_score
@@ -32,7 +33,7 @@ def _qout(q: Question) -> QuestionOut:
 def ask(body: AskIn, request: Request, user: User = Depends(current_user),
         db: Session = Depends(get_db)) -> dict:
     retriever = request.app.state.index_cache.get(db, user.id)
-    return answer(body.question, retriever).to_dict()
+    return answer(body.question, retriever, llm=request.app.state.llm).to_dict()
 
 
 @router.get("/questions", response_model=list[QuestionOut])
@@ -56,10 +57,10 @@ def create_question(body: QuestionIn, user: User = Depends(current_user),
 
 @router.post("/questions/{question_id}/attempts", response_model=AttemptOut,
              status_code=status.HTTP_201_CREATED)
-def submit_attempt(question_id: int, body: AttemptIn, user: User = Depends(current_user),
+def submit_attempt(question_id: int, body: AttemptIn, request: Request, user: User = Depends(current_user),
                    db: Session = Depends(get_db)) -> AttemptOut:
     q = _visible_question(db, user, question_id)
-    result = evaluate(body.answer, rubric_from_dicts(json.loads(q.rubric_json)))
+    result = grade(q.prompt, body.answer, rubric_from_dicts(json.loads(q.rubric_json)), request.app.state.llm)
 
     state_row = db.scalar(select(ReviewState).where(
         ReviewState.user_id == user.id, ReviewState.question_id == q.id))
@@ -81,7 +82,8 @@ def submit_attempt(question_id: int, body: AttemptIn, user: User = Depends(curre
     db.commit()  # attempt and schedule change land together or not at all
     return AttemptOut(attempt_id=attempt.id, score=result.score, covered=result.covered,
                       missed=result.missed, feedback=result.feedback,
-                      interval_days=new.interval_days, next_due_at=state_row.due_at)
+                      interval_days=new.interval_days, next_due_at=state_row.due_at,
+                      grader=result.grader, evidence=result.evidence, rejected=result.rejected)
 
 
 @router.get("/review/due", response_model=list[QuestionOut])

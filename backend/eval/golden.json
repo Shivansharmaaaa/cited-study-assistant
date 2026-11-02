@@ -1,0 +1,33 @@
+{
+  "direct": [
+    {"q": "Which articles cover Fundamental Rights?", "note": "N01"},
+    {"q": "Which writs can the Supreme Court issue?", "note": "N02"},
+    {"q": "Are Directive Principles enforceable by courts?", "note": "N03"},
+    {"q": "Which amendment added Fundamental Duties?", "note": "N04"},
+    {"q": "When did the Constitution come into force?", "note": "N05"},
+    {"q": "Who laid down the basic structure doctrine?", "note": "N06"},
+    {"q": "What did the 73rd Amendment do for Panchayati Raj?", "note": "N07"},
+    {"q": "Which article gives the Election Commission control of elections?", "note": "N08"},
+    {"q": "What is President's Rule?", "note": "N09"}
+  ],
+  "paraphrase": [
+    {"q": "Which provision guards a person's life and freedom?", "note": "N01"},
+    {"q": "Which order brings someone held in custody before a judge?", "note": "N02"},
+    {"q": "Can a judge force the government to follow state policy guidelines?", "note": "N03"},
+    {"q": "What moral obligations do citizens carry under the Constitution?", "note": "N04"},
+    {"q": "How does the opening statement describe the nation?", "note": "N05"},
+    {"q": "Can lawmakers change anything they like in the Constitution?", "note": "N06"},
+    {"q": "Which change gave villages their own elected councils?", "note": "N07"},
+    {"q": "Who runs polling for the national legislature?", "note": "N08"},
+    {"q": "What happens when a state government breaks down?", "note": "N09"}
+  ],
+  "out_of_scope": [
+    {"q": "How do I bake sourdough bread?"},
+    {"q": "What is the boiling point of water at sea level?"},
+    {"q": "Who won the 2011 cricket world cup?"},
+    {"q": "Explain how photosynthesis works."},
+    {"q": "How does a transistor amplify a signal?"},
+    {"q": "What does Article 370 say about Jammu and Kashmir?"},
+    {"q": "What are the powers of the Reserve Bank of India?"}
+  ]
+}

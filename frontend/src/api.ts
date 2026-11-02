@@ -1,10 +1,16 @@
-export type Citation = { ref: number; note_id: string; title: string; sentence: string; score: number };
-export type Answer = { question: string; answered: boolean; text: string; citations: Citation[] };
+export type Citation = {
+  ref: number; note_id: string; title: string; sentence: string; score: number; bm25: number; dense: number;
+};
+export type Answer = {
+  question: string; answered: boolean; text: string; citations: Citation[];
+  mode: "claude" | "extractive" | "abstain"; fallback_reason: string | null;
+};
 export type Note = { id: number; title: string; text: string; shared: boolean };
 export type Question = { id: number; topic: string; prompt: string; shared: boolean };
 export type AttemptResult = {
   attempt_id: number; score: number; covered: string[]; missed: string[];
   feedback: string; interval_days: number; next_due_at: string;
+  grader: "claude" | "keyword"; evidence: Record<string, string>; rejected: string[];
 };
 export type Stats = {
   total_attempts: number; average_score: number; due_now: number;
@@ -33,7 +39,7 @@ async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
     // FastAPI returns {detail: string} or, for validation errors, {detail: [...]}.
-    const detail = typeof data.detail === "string" ? data.detail : "Request failed";
+    const detail = typeof data.detail === "string" ? data.detail : data.detail?.[0]?.msg ?? "Request failed";
     throw new ApiError(res.status, detail);
   }
   return data as T;

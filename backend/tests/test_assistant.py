@@ -4,7 +4,7 @@ import pytest
 
 from app.assistant import answer
 from app.evaluator import KeyPoint, evaluate
-from app.retriever import BM25Retriever, tokenize
+from app.retriever import BM25Retriever, split_sentences, tokenize
 
 DATA = Path(__file__).resolve().parent.parent / "data" / "notes.json"
 
@@ -16,6 +16,12 @@ def retriever():
 
 def test_tokenize_drops_stopwords():
     assert tokenize("What is the Preamble of India?") == ["preamble", "india"]
+
+
+def test_split_sentences_keeps_initials_and_case_names_whole():
+    assert split_sentences("Dr B. R. Ambedkar spoke. It was in Part III. Next one!") == [
+        "Dr B. R. Ambedkar spoke.", "It was in Part III.", "Next one!"]
+    assert len(split_sentences("Kesavananda Bharati v. State of Kerala was in 1973.")) == 1
 
 
 @pytest.mark.parametrize(

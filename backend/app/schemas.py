@@ -71,6 +71,9 @@ class AttemptOut(BaseModel):
     feedback: str
     interval_days: int
     next_due_at: datetime
+    grader: str
+    evidence: dict[str, str]
+    rejected: list[str]
 
 
 class TopicStat(BaseModel):

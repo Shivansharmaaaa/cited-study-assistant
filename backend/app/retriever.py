@@ -32,7 +32,8 @@ def tokenize(text: str) -> list[str]:
 
 
 def split_sentences(text: str) -> list[str]:
-    parts = re.split(r"(?<=[.!?])\s+", text.strip())
+    # Not after an initial ("B. R. Ambedkar") or a short form ("Dr", "v." in case names).
+    parts = re.split(r"(?<=[.!?])(?<!\b[A-Z]\.)(?<!\bDr\.)(?<!\bv\.)\s+", text.strip())
     return [p.strip() for p in parts if p.strip()]
 
 
